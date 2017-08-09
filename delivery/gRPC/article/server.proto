@@ -1,0 +1,3 @@
+service ArticleHandler {
+  rpc GetArticle (Article) returns (Article);
+}
