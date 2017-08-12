@@ -2,6 +2,7 @@ package article
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/bxcodec/go-clean-arch-grpc/models"
 	"github.com/bxcodec/go-clean-arch-grpc/repository"
@@ -35,6 +36,17 @@ func (a *articleUsecase) GetByID(id int64) (*models.Article, error) {
 
 	return a.articleRepos.GetByID(id)
 }
+
+func (a *articleUsecase) Update(ar *models.Article) (*models.Article, error) {
+	_, err := a.articleRepos.GetByID(ar.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	ar.UpdatedAt = time.Now()
+	return a.articleRepos.Update(ar)
+}
+
 func (a *articleUsecase) GetByTitle(title string) (*models.Article, error) {
 
 	return a.articleRepos.GetByTitle(title)
