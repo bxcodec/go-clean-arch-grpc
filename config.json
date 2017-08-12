@@ -1,7 +1,7 @@
 {
   "debug": true,
   "server": {
-    "address": ":9090"
+    "address": ":8080"
   },
   "database": {
       "host": "localhost",

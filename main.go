@@ -9,15 +9,11 @@ import (
 	"google.golang.org/grpc"
 
 	cfg "github.com/bxcodec/go-clean-arch-grpc/config/env"
-	"github.com/bxcodec/go-clean-arch-grpc/config/middleware"
 	deliveryGrpc "github.com/bxcodec/go-clean-arch-grpc/delivery/grpc"
-	httpDeliver "github.com/bxcodec/go-clean-arch-grpc/delivery/http"
+
 	articleRepo "github.com/bxcodec/go-clean-arch-grpc/repository/mysql/article"
-	categoryRepo "github.com/bxcodec/go-clean-arch-grpc/repository/mysql/category"
 	articleUcase "github.com/bxcodec/go-clean-arch-grpc/usecase/article"
-	categoryUcase "github.com/bxcodec/go-clean-arch-grpc/usecase/category"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo"
 )
 
 var config cfg.Config
@@ -48,29 +44,21 @@ func main() {
 		fmt.Println(err)
 	}
 	defer dbConn.Close()
-	e := echo.New()
-	middL := middleware.InitMiddleware()
-	e.Use(middL.CORS)
 
 	ar := articleRepo.NewMysqlArticleRepository(dbConn)
 	au := articleUcase.NewArticleUsecase(ar)
-	cr := categoryRepo.NewMysqlCategoryRepository(dbConn)
-	cu := categoryUcase.NewCategoryUsecase(cr)
-
-	httpDeliveryHandler := httpDeliver.HttpHandler{
-		E: e,
-	}
-	httpDeliveryHandler.
-		InitArticleDelivery(au).
-		InitCategoryDelivery(cu)
-
-	list, err := net.Listen("tcp", ":8080")
+	list, err := net.Listen("tcp", config.GetString("server.address"))
 	if err != nil {
 		fmt.Println("SOMETHING HAPPEN")
 	}
 
 	server := grpc.NewServer()
 	deliveryGrpc.NewArticleServerGrpc(server, au)
-	go server.Serve(list)
-	e.Start(config.GetString("server.address"))
+	fmt.Println("Server Run at ", config.GetString("server.address"))
+
+	err = server.Serve(list)
+	if err != nil {
+		fmt.Println("Unexpected Error", err)
+	}
+
 }
