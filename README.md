@@ -5,6 +5,9 @@ This is an example of implementation of Clean Architecture in Go (Golang) projec
 
 The explanation about this project's structure  can read from this medium's post :  https://medium.com/@imantumorang/implementing-grpc-service-in-golang-afb9e05c0064
 
+
+The client project can seen here : https://github.com/bxcodec/sample-client-grpc
+
 ### How To Run This Project
 
 ```bash
