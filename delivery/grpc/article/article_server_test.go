@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
+	"github.com/bxcodec/go-clean-arch-grpc/delivery/grpc/article/article_grpc"
 	"github.com/bxcodec/go-clean-arch-grpc/models"
 	"github.com/bxcodec/go-clean-arch-grpc/usecase/mocks"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func TestGet(t *testing.T) {
 		usecase: mockUsecase,
 	}
 
-	single := &SingleRequest{Id: id}
+	single := &article_grpc.SingleRequest{Id: id}
 
 	res, err := handler.GetArticle(context.Background(), single)
 
@@ -53,7 +54,7 @@ func TestStore(t *testing.T) {
 func TestDelete(t *testing.T) {
 	mockUsecase := &mocks.ArticleUsecase{}
 
-	a := &DeleteResponse{}
+	a := &article_grpc.DeleteResponse{}
 	faker.FakeData(a)
 	id := int64(2)
 	mockUsecase.On("Delete", mock.AnythingOfType("int64")).Return(true, nil)
@@ -62,7 +63,7 @@ func TestDelete(t *testing.T) {
 		usecase: mockUsecase,
 	}
 
-	single := &SingleRequest{Id: id}
+	single := &article_grpc.SingleRequest{Id: id}
 
 	res, err := handler.Delete(context.Background(), single)
 
@@ -107,7 +108,7 @@ func TestGetListArticle(t *testing.T) {
 		usecase: mockUsecase,
 	}
 
-	fetc := &FetchRequest{
+	fetc := &article_grpc.FetchRequest{
 		Num:    10,
 		Cursor: "sample Cursor"}
 

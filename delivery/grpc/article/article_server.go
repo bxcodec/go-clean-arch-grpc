@@ -4,6 +4,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/bxcodec/go-clean-arch-grpc/delivery/grpc/article/article_grpc"
 	"github.com/bxcodec/go-clean-arch-grpc/models"
 	"github.com/bxcodec/go-clean-arch-grpc/usecase"
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
@@ -14,7 +15,7 @@ type server struct {
 	usecase usecase.ArticleUsecase
 }
 
-func (s *server) transformArticleRPC(ar *models.Article) *Article {
+func (s *server) transformArticleRPC(ar *models.Article) *article_grpc.Article {
 	updated_at := &google_protobuf.Timestamp{
 
 		Seconds: ar.UpdatedAt.Unix(),
@@ -22,7 +23,7 @@ func (s *server) transformArticleRPC(ar *models.Article) *Article {
 	created_at := &google_protobuf.Timestamp{
 		Seconds: ar.CreatedAt.Unix(),
 	}
-	res := &Article{
+	res := &article_grpc.Article{
 		ID:        ar.ID,
 		Title:     ar.Title,
 		Content:   ar.Content,
@@ -32,7 +33,7 @@ func (s *server) transformArticleRPC(ar *models.Article) *Article {
 	return res
 }
 
-func (s *server) transformArticleData(ar *Article) *models.Article {
+func (s *server) transformArticleData(ar *article_grpc.Article) *models.Article {
 	updated_at := time.Unix(ar.GetUpdatedAt().GetSeconds(), 0)
 	created_at := time.Unix(ar.GetCreatedAt().GetSeconds(), 0)
 	res := &models.Article{
@@ -45,7 +46,7 @@ func (s *server) transformArticleData(ar *Article) *models.Article {
 	return res
 }
 
-func (s *server) GetArticle(ctx context.Context, in *SingleRequest) (*Article, error) {
+func (s *server) GetArticle(ctx context.Context, in *article_grpc.SingleRequest) (*article_grpc.Article, error) {
 	id := int64(0)
 	if in != nil {
 		id = in.Id
@@ -59,7 +60,7 @@ func (s *server) GetArticle(ctx context.Context, in *SingleRequest) (*Article, e
 	return res, nil
 }
 
-func (s *server) FetchArticle(in *FetchRequest, stream ArticleHandler_FetchArticleServer) error {
+func (s *server) FetchArticle(in *article_grpc.FetchRequest, stream article_grpc.ArticleHandler_FetchArticleServer) error {
 
 	cursor := ""
 	num := int64(0)
@@ -82,7 +83,7 @@ func (s *server) FetchArticle(in *FetchRequest, stream ArticleHandler_FetchArtic
 	return nil
 }
 
-func (s *server) GetListArticle(ctx context.Context, in *FetchRequest) (*ListArticle, error) {
+func (s *server) GetListArticle(ctx context.Context, in *article_grpc.FetchRequest) (*article_grpc.ListArticle, error) {
 	cursor := ""
 	num := int64(0)
 	if in != nil {
@@ -96,19 +97,19 @@ func (s *server) GetListArticle(ctx context.Context, in *FetchRequest) (*ListArt
 	if err != nil {
 		return nil, err
 	}
-	arrArticle := make([]*Article, len(list))
+	arrArticle := make([]*article_grpc.Article, len(list))
 	for i, a := range list {
 		ar := s.transformArticleRPC(a)
 		arrArticle[i] = ar
 	}
-	result := &ListArticle{
+	result := &article_grpc.ListArticle{
 		Artilces: arrArticle,
 		Cursor:   nextCursor,
 	}
 	return result, nil
 }
 
-func (s *server) UpdateArticle(c context.Context, ar *Article) (*Article, error) {
+func (s *server) UpdateArticle(c context.Context, ar *article_grpc.Article) (*article_grpc.Article, error) {
 	a := s.transformArticleData(ar)
 	res, err := s.usecase.Update(a)
 	if err != nil {
@@ -118,7 +119,7 @@ func (s *server) UpdateArticle(c context.Context, ar *Article) (*Article, error)
 	return l, nil
 }
 
-func (s *server) Delete(c context.Context, in *SingleRequest) (*DeleteResponse, error) {
+func (s *server) Delete(c context.Context, in *article_grpc.SingleRequest) (*article_grpc.DeleteResponse, error) {
 	id := int64(0)
 	if in != nil {
 		id = in.Id
@@ -128,7 +129,7 @@ func (s *server) Delete(c context.Context, in *SingleRequest) (*DeleteResponse, 
 	if err != nil {
 		return nil, err
 	}
-	resp := &DeleteResponse{
+	resp := &article_grpc.DeleteResponse{
 		Status: "Not Oke To Delete",
 	}
 	if ok {
@@ -138,7 +139,7 @@ func (s *server) Delete(c context.Context, in *SingleRequest) (*DeleteResponse, 
 	return resp, nil
 }
 
-func (s *server) Store(ctx context.Context, a *Article) (*Article, error) {
+func (s *server) Store(ctx context.Context, a *article_grpc.Article) (*article_grpc.Article, error) {
 	ar := s.transformArticleData(a)
 	data, err := s.usecase.Store(ar)
 	if err != nil {
@@ -149,13 +150,13 @@ func (s *server) Store(ctx context.Context, a *Article) (*Article, error) {
 	return res, nil
 }
 
-func (s *server) BatchInsert(stream ArticleHandler_BatchInsertServer) error {
-	errs := make([]*ErrorMessage, 0)
+func (s *server) BatchInsert(stream article_grpc.ArticleHandler_BatchInsertServer) error {
+	errs := make([]*article_grpc.ErrorMessage, 0)
 	totalSukses := int64(0)
 	for {
 		article, err := stream.Recv()
 		if err == io.EOF {
-			return stream.SendAndClose(&BatchInsertResponse{
+			return stream.SendAndClose(&article_grpc.BatchInsertResponse{
 				Errors:       errs,
 				TotalSuccess: totalSukses,
 			})
@@ -166,7 +167,7 @@ func (s *server) BatchInsert(stream ArticleHandler_BatchInsertServer) error {
 		a := s.transformArticleData(article)
 		res, err := s.usecase.Store(a)
 		if err != nil {
-			e := &ErrorMessage{
+			e := &article_grpc.ErrorMessage{
 				Message: err.Error(),
 			}
 			errs = append(errs, e)
@@ -178,7 +179,7 @@ func (s *server) BatchInsert(stream ArticleHandler_BatchInsertServer) error {
 
 }
 
-func (s *server) BatchUpdate(stream ArticleHandler_BatchUpdateServer) error {
+func (s *server) BatchUpdate(stream article_grpc.ArticleHandler_BatchUpdateServer) error {
 	for {
 		ar, err := stream.Recv()
 		if err == io.EOF {
@@ -200,6 +201,6 @@ func (s *server) BatchUpdate(stream ArticleHandler_BatchUpdateServer) error {
 	}
 }
 
-func NewArticleServer(u usecase.ArticleUsecase) ArticleHandlerServer {
+func NewArticleServer(u usecase.ArticleUsecase) article_grpc.ArticleHandlerServer {
 	return &server{usecase: u}
 }
