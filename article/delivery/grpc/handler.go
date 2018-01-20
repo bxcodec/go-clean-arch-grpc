@@ -1,18 +1,32 @@
-package article
+package grpc
 
 import (
 	"io"
 	"time"
 
-	"github.com/bxcodec/go-clean-arch-grpc/delivery/grpc/article/article_grpc"
-	"github.com/bxcodec/go-clean-arch-grpc/models"
-	"github.com/bxcodec/go-clean-arch-grpc/usecase"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	"context"
+
+	models "github.com/bxcodec/go-clean-arch-grpc/article"
+	"github.com/bxcodec/go-clean-arch-grpc/article/delivery/grpc/article_grpc"
+	_usecase "github.com/bxcodec/go-clean-arch-grpc/article/usecase"
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
-	context "golang.org/x/net/context"
 )
 
+func NewArticleServerGrpc(gserver *grpc.Server, articleUcase _usecase.ArticleUsecase) {
+
+	articleServer := &server{
+		usecase: articleUcase,
+	}
+
+	article_grpc.RegisterArticleHandlerServer(gserver, articleServer)
+	reflection.Register(gserver)
+}
+
 type server struct {
-	usecase usecase.ArticleUsecase
+	usecase _usecase.ArticleUsecase
 }
 
 func (s *server) transformArticleRPC(ar *models.Article) *article_grpc.Article {
@@ -199,8 +213,4 @@ func (s *server) BatchUpdate(stream article_grpc.ArticleHandler_BatchUpdateServe
 			return err
 		}
 	}
-}
-
-func NewArticleServer(u usecase.ArticleUsecase) article_grpc.ArticleHandlerServer {
-	return &server{usecase: u}
 }

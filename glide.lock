@@ -1,5 +1,5 @@
-hash: 499feaec5c3709f70469e1ad2cf2ba50989b8c54c78c40ffee63b936f4bf63c9
-updated: 2017-08-09T12:02:45.47773561+07:00
+hash: 8b88c8929ff47e7376caa67a7cf4dbc324289e0818913b8553a604c929cb08fb
+updated: 2018-01-20T11:55:57.918051+07:00
 imports:
 - name: github.com/bxcodec/faker
   version: 7c5fff7ed02e14ac848ef83aee45b95627c96ae2
@@ -15,6 +15,9 @@ imports:
   version: 748d386b5c1ea99658fd69fe9f03991ce86a90c1
   subpackages:
   - proto
+  - protoc-gen-go/descriptor
+  - ptypes/any
+  - ptypes/timestamp
 - name: github.com/hashicorp/hcl
   version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
   subpackages:
@@ -75,6 +78,16 @@ imports:
   subpackages:
   - acme
   - acme/autocert
+- name: golang.org/x/net
+  version: 5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - lex/httplex
+  - trace
 - name: golang.org/x/sys
   version: d8f5ea21b9295e315e612b4bcf4bedea93454d4d
   subpackages:
@@ -82,10 +95,32 @@ imports:
 - name: golang.org/x/text
   version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
   subpackages:
+  - secure/bidirule
   - transform
+  - unicode/bidi
   - unicode/norm
+- name: google.golang.org/genproto
+  version: a8101f21cf983e773d0c1133ebc5424792003214
+  subpackages:
+  - googleapis/rpc/status
 - name: google.golang.org/grpc
   version: b8669c35455183da6d5c474ea6e72fbf55183274
+  subpackages:
+  - codes
+  - credentials
+  - grpclb/grpc_lb_v1
+  - grpclog
+  - internal
+  - keepalive
+  - metadata
+  - naming
+  - peer
+  - reflection
+  - reflection/grpc_reflection_v1alpha
+  - stats
+  - status
+  - tap
+  - transport
 - name: gopkg.in/DATA-DOG/go-sqlmock.v1
   version: b983233bc0bbea4dc6e8ec8c8c923d935765ffec
 - name: gopkg.in/yaml.v2

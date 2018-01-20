@@ -1,13 +1,21 @@
-package article
+package usecase
 
 import (
 	"strconv"
 	"time"
 
-	"github.com/bxcodec/go-clean-arch-grpc/models"
-	"github.com/bxcodec/go-clean-arch-grpc/repository"
-	"github.com/bxcodec/go-clean-arch-grpc/usecase"
+	models "github.com/bxcodec/go-clean-arch-grpc/article"
+	"github.com/bxcodec/go-clean-arch-grpc/article/repository"
 )
+
+type ArticleUsecase interface {
+	Fetch(cursor string, num int64) ([]*models.Article, string, error)
+	GetByID(id int64) (*models.Article, error)
+	Update(ar *models.Article) (*models.Article, error)
+	GetByTitle(title string) (*models.Article, error)
+	Store(*models.Article) (*models.Article, error)
+	Delete(id int64) (bool, error)
+}
 
 type articleUsecase struct {
 	articleRepos repository.ArticleRepository
@@ -56,7 +64,7 @@ func (a *articleUsecase) Store(m *models.Article) (*models.Article, error) {
 
 	existedArticle, _ := a.GetByTitle(m.Title)
 	if existedArticle != nil {
-		return nil, models.NewErrorConflict()
+		return nil, models.CONFLIT_ERROR
 	}
 
 	id, err := a.articleRepos.Store(m)
@@ -72,12 +80,12 @@ func (a *articleUsecase) Delete(id int64) (bool, error) {
 	existedArticle, _ := a.GetByID(id)
 
 	if existedArticle == nil {
-		return false, models.NewErrorNotFound()
+		return false, models.NOT_FOUND_ERROR
 	}
 
 	return a.articleRepos.Delete(id)
 }
 
-func NewArticleUsecase(a repository.ArticleRepository) usecase.ArticleUsecase {
+func NewArticleUsecase(a repository.ArticleRepository) ArticleUsecase {
 	return &articleUsecase{a}
 }
