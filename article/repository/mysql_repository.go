@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	models "github.com/bxcodec/go-clean-arch-grpc/article"
@@ -60,6 +61,7 @@ func (m *mysqlArticleRepository) GetByID(id int64) (*models.Article, error) {
 
 	list, err := m.fetch(query, id)
 	if err != nil {
+
 		return nil, err
 	}
 
@@ -67,7 +69,8 @@ func (m *mysqlArticleRepository) GetByID(id int64) (*models.Article, error) {
 	if len(list) > 0 {
 		a = list[0]
 	} else {
-		return nil, models.INTERNAL_SERVER_ERROR
+
+		return nil, models.NOT_FOUND_ERROR
 	}
 
 	return a, nil
@@ -152,7 +155,7 @@ func (m *mysqlArticleRepository) Update(ar *models.Article) (*models.Article, er
 		return nil, err
 	}
 	if affect < 1 {
-		return nil, models.INTERNAL_SERVER_ERROR
+		return nil, errors.New("Nothing Affected. Make sure your article is exist in DB")
 	}
 
 	return ar, nil

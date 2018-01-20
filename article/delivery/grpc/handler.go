@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"io"
+	"log"
 	"time"
 
 	"google.golang.org/grpc"
@@ -30,6 +31,11 @@ type server struct {
 }
 
 func (s *server) transformArticleRPC(ar *models.Article) *article_grpc.Article {
+
+	if ar == nil {
+		return nil
+	}
+
 	updated_at := &google_protobuf.Timestamp{
 
 		Seconds: ar.UpdatedAt.Unix(),
@@ -67,7 +73,11 @@ func (s *server) GetArticle(ctx context.Context, in *article_grpc.SingleRequest)
 	}
 	ar, err := s.usecase.GetByID(id)
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
+	}
+	if ar == nil {
+		return nil, models.NOT_FOUND_ERROR
 	}
 
 	res := s.transformArticleRPC(ar)
@@ -84,6 +94,7 @@ func (s *server) FetchArticle(in *article_grpc.FetchRequest, stream article_grpc
 	}
 	list, _, err := s.usecase.Fetch(cursor, num)
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
@@ -91,6 +102,7 @@ func (s *server) FetchArticle(in *article_grpc.FetchRequest, stream article_grpc
 		ar := s.transformArticleRPC(a)
 
 		if err := stream.Send(ar); err != nil {
+			log.Println(err.Error())
 			return err
 		}
 	}
@@ -109,6 +121,7 @@ func (s *server) GetListArticle(ctx context.Context, in *article_grpc.FetchReque
 	list, nextCursor, err := s.usecase.Fetch(cursor, num)
 
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	arrArticle := make([]*article_grpc.Article, len(list))
@@ -127,7 +140,8 @@ func (s *server) UpdateArticle(c context.Context, ar *article_grpc.Article) (*ar
 	a := s.transformArticleData(ar)
 	res, err := s.usecase.Update(a)
 	if err != nil {
-		return nil, nil
+		log.Println(err.Error())
+		return nil, err
 	}
 	l := s.transformArticleRPC(res)
 	return l, nil
@@ -141,6 +155,7 @@ func (s *server) Delete(c context.Context, in *article_grpc.SingleRequest) (*art
 
 	ok, err := s.usecase.Delete(id)
 	if err != nil {
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
 		return nil, err
 	}
 	resp := &article_grpc.DeleteResponse{
@@ -157,6 +172,7 @@ func (s *server) Store(ctx context.Context, a *article_grpc.Article) (*article_g
 	ar := s.transformArticleData(a)
 	data, err := s.usecase.Store(ar)
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
 	res := s.transformArticleRPC(data)
@@ -176,11 +192,13 @@ func (s *server) BatchInsert(stream article_grpc.ArticleHandler_BatchInsertServe
 			})
 		}
 		if err != nil {
+			log.Println(err.Error())
 			return err
 		}
 		a := s.transformArticleData(article)
 		res, err := s.usecase.Store(a)
 		if err != nil {
+			log.Println(err.Error())
 			e := &article_grpc.ErrorMessage{
 				Message: err.Error(),
 			}
@@ -200,16 +218,24 @@ func (s *server) BatchUpdate(stream article_grpc.ArticleHandler_BatchUpdateServe
 			return nil
 		}
 		if err != nil {
+			log.Println(err.Error())
 			return err
 		}
 
 		a := s.transformArticleData(ar)
 		a, er := s.usecase.Update(a)
+
 		if er != nil {
+			log.Println("Something error when updating Article", er)
 			return er
+		}
+		if a == nil {
+			log.Println("Article Not Found")
+			return models.NOT_FOUND_ERROR
 		}
 		res := s.transformArticleRPC(a)
 		if err := stream.Send(res); err != nil {
+			log.Println(err.Error())
 			return err
 		}
 	}

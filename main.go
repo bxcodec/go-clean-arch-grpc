@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net"
 	"net/url"
 
@@ -24,6 +25,7 @@ func init() {
 	if config.GetBool(`debug`) {
 		fmt.Println("Service RUN on DEBUG mode")
 	}
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 }
 
