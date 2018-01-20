@@ -3,16 +3,17 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net"
 	"net/url"
 
 	"google.golang.org/grpc"
 
+	deliveryGrpc "github.com/bxcodec/go-clean-arch-grpc/article/delivery/grpc"
 	cfg "github.com/bxcodec/go-clean-arch-grpc/config/env"
-	deliveryGrpc "github.com/bxcodec/go-clean-arch-grpc/delivery/grpc"
 
-	articleRepo "github.com/bxcodec/go-clean-arch-grpc/repository/mysql/article"
-	articleUcase "github.com/bxcodec/go-clean-arch-grpc/usecase/article"
+	articleRepo "github.com/bxcodec/go-clean-arch-grpc/article/repository"
+	articleUcase "github.com/bxcodec/go-clean-arch-grpc/article/usecase"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -24,6 +25,7 @@ func init() {
 	if config.GetBool(`debug`) {
 		fmt.Println("Service RUN on DEBUG mode")
 	}
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 }
 

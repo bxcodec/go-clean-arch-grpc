@@ -1,11 +1,11 @@
-package article_test
+package repository_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/bxcodec/go-clean-arch-grpc/models"
-	articleRepo "github.com/bxcodec/go-clean-arch-grpc/repository/mysql/article"
+	models "github.com/bxcodec/go-clean-arch-grpc/article"
+	articleRepo "github.com/bxcodec/go-clean-arch-grpc/article/repository"
 	"github.com/stretchr/testify/assert"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )

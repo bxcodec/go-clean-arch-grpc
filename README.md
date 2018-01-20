@@ -10,46 +10,49 @@ The client project can seen here : https://github.com/bxcodec/sample-client-grpc
 
 ### How To Run This Project
 
+#### Dowload the project
 ```bash
-#move to directory
-cd $GOPATH/src/github.com/bxcodec
-
-# Clone into YOUR $GOPATH/src
-git clone https://github.com/bxcodec/go-clean-arch-grpc.git
-
-#move to project
-cd go-clean-arch-grpc
-
-# Install Dependencies
-glide install -v
-
-# Make File
-make
-
-# Run Project
-go run main.go
-
-```
-
-Or
-
-```bash
-# GET WITH GO GET
+# Download the project 
 go get github.com/bxcodec/go-clean-arch-grpc
 
-# Go to directory
-
+#move to directory
 cd $GOPATH/src/github.com/bxcodec/go-clean-arch-grpc
-
+ 
 # Install Dependencies
 glide install -v
 
 # Make File
 make
-
-# Run Project
-go run main.go
 ```
 
+#### Set  the config
+Open `config.json`
+Change to your own database config
+```js
+{
+  "debug": true,
+  "server": {
+    "address": ":8080"
+  },
+  "database": {
+      "host": "localhost",
+      "port": "33061",
+      "user": "root",
+      "pass": "password",
+      "name": "article"
+  }
+
+}
+
+```
+
+
+####  Run Project
+
+```bash
+go run main.go
+
+```
+ 
 
 > Make Sure you have run the article.sql in your mysql
