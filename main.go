@@ -10,10 +10,9 @@ import (
 	"google.golang.org/grpc"
 
 	deliveryGrpc "github.com/bxcodec/go-clean-arch-grpc/article/delivery/grpc"
-	cfg "github.com/bxcodec/go-clean-arch-grpc/config/env"
-
 	articleRepo "github.com/bxcodec/go-clean-arch-grpc/article/repository"
 	articleUcase "github.com/bxcodec/go-clean-arch-grpc/article/usecase"
+	cfg "github.com/bxcodec/go-clean-arch-grpc/config/env"
 	_ "github.com/go-sql-driver/mysql"
 )
 

@@ -4,24 +4,18 @@ import (
 	"strconv"
 	"time"
 
-	models "github.com/bxcodec/go-clean-arch-grpc/article"
-	"github.com/bxcodec/go-clean-arch-grpc/article/repository"
+	models "github.com/bxcodec/go-clean-arch-grpc/domain"
 )
 
-type ArticleUsecase interface {
-	Fetch(cursor string, num int64) ([]*models.Article, string, error)
-	GetByID(id int64) (*models.Article, error)
-	Update(ar *models.Article) (*models.Article, error)
-	GetByTitle(title string) (*models.Article, error)
-	Store(*models.Article) (*models.Article, error)
-	Delete(id int64) (bool, error)
-}
-
 type articleUsecase struct {
-	articleRepos repository.ArticleRepository
+	articleRepos models.ArticleRepository
 }
 
-func (a *articleUsecase) Fetch(cursor string, num int64) ([]*models.Article, string, error) {
+func NewArticleUsecase(a models.ArticleRepository) models.ArticleUsecase {
+	return &articleUsecase{a}
+}
+
+func (a *articleUsecase) Fetch(cursor string, num int64) ([]models.Article, string, error) {
 	if num == 0 {
 		num = 10
 	}
@@ -40,52 +34,44 @@ func (a *articleUsecase) Fetch(cursor string, num int64) ([]*models.Article, str
 	return listArticle, nextCursor, nil
 }
 
-func (a *articleUsecase) GetByID(id int64) (*models.Article, error) {
+func (a *articleUsecase) GetByID(id int64) (models.Article, error) {
 
 	return a.articleRepos.GetByID(id)
 }
 
-func (a *articleUsecase) Update(ar *models.Article) (*models.Article, error) {
+func (a *articleUsecase) Update(ar *models.Article) error {
 	_, err := a.articleRepos.GetByID(ar.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	ar.UpdatedAt = time.Now()
 	return a.articleRepos.Update(ar)
 }
 
-func (a *articleUsecase) GetByTitle(title string) (*models.Article, error) {
+func (a *articleUsecase) GetByTitle(title string) (models.Article, error) {
 
 	return a.articleRepos.GetByTitle(title)
 }
 
-func (a *articleUsecase) Store(m *models.Article) (*models.Article, error) {
+func (a *articleUsecase) Store(m *models.Article) error {
 
-	existedArticle, _ := a.GetByTitle(m.Title)
-	if existedArticle != nil {
-		return nil, models.CONFLIT_ERROR
-	}
-
-	id, err := a.articleRepos.Store(m)
+	_, err := a.GetByTitle(m.Title)
 	if err != nil {
-		return nil, err
+		if err == models.NOT_FOUND_ERROR {
+			return models.CONFLIT_ERROR
+		}
+		return err
 	}
 
-	m.ID = id
-	return m, nil
+	return a.articleRepos.Store(m)
+
 }
 
-func (a *articleUsecase) Delete(id int64) (bool, error) {
-	existedArticle, _ := a.GetByID(id)
-
-	if existedArticle == nil {
-		return false, models.NOT_FOUND_ERROR
+func (a *articleUsecase) Delete(id int64) error {
+	_, err := a.GetByID(id)
+	if err != nil {
+		return err
 	}
-
 	return a.articleRepos.Delete(id)
-}
-
-func NewArticleUsecase(a repository.ArticleRepository) ArticleUsecase {
-	return &articleUsecase{a}
 }
