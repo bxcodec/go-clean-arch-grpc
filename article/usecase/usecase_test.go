@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	models "github.com/bxcodec/go-clean-arch-grpc/article"
-	"github.com/bxcodec/go-clean-arch-grpc/article/repository/mocks"
 	ucase "github.com/bxcodec/go-clean-arch-grpc/article/usecase"
+	models "github.com/bxcodec/go-clean-arch-grpc/domain"
+	"github.com/bxcodec/go-clean-arch-grpc/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -84,10 +84,9 @@ func TestStore(t *testing.T) {
 
 	u := ucase.NewArticleUsecase(mockArticleRepo)
 
-	a, err := u.Store(&tempMockArticle)
+	err = u.Store(&tempMockArticle)
 
 	assert.NoError(t, err)
-	assert.NotNil(t, a)
 	assert.Equal(t, mockArticle.Title, tempMockArticle.Title)
 
 }
@@ -106,9 +105,7 @@ func TestDelete(t *testing.T) {
 
 	u := ucase.NewArticleUsecase(mockArticleRepo)
 
-	a, err := u.Delete(mockArticle.ID)
-
+	err = u.Delete(mockArticle.ID)
 	assert.NoError(t, err)
-	assert.True(t, a)
 
 }
